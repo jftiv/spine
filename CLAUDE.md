@@ -8,10 +8,16 @@ They change code in a **target repository** somewhere else on disk.
 1. Identify the target repo. The user names it ("work in `~/source/acme-api`") or you ask.
    If the request is genuinely about spine itself (adding an agent, editing a playbook),
    there is no target repo — say so and proceed.
-2. Read `docs/<repo>/` if it exists. `docs/<repo>/overview.md` is the fastest way to get
-   oriented; `decisions.md` tells you what has already been settled and why.
-   If it does not exist, this is a first session for that repo — you will create it at
-   the end.
+2. Read the docs, in this order:
+   - The target repo's own `docs/README.md` and whatever it points to. `decisions.md`
+     there tells you what has already been settled and why.
+   - spine's `docs/landscape.md` for how this repo fits with the others, and
+     `docs/decisions.md` for decisions that span repos.
+   - The recent entries in spine's `docs/sessions/<repo>.md`, to see where the last
+     session left off.
+
+   If the repo has no `docs/`, this is its first documented session. You will create
+   it at the end.
 3. Read `preferences/stack.md` and `preferences/conventions.md`. These are the user's
    defaults and they override an agent's generic advice.
 4. Work in the target repo's own directory. Do not copy target code into spine.
@@ -34,13 +40,20 @@ yourself. A one-line CSS fix does not need the frontend agent.
 
 ## Documentation duty
 
-At the end of any session that changed code in a target repo, update `docs/<repo>/`.
-The `SessionEnd` hook will remind you; do it whether or not it fires. See
+At the end of any session that changed code in a target repo, update the docs. The
+`SessionEnd` hook will remind you; do it whether or not it fires. See
 `playbooks/doc-sync/PLAYBOOK.md` for exactly what to write.
 
+There are two tiers:
+
+- **The target repo's `docs/`**: everything about that repo. It ships with the code and
+  is written for people and agents alike.
+- **spine's `docs/`**: what spans repos (how they connect, cross-repo decisions and
+  plans), plus a session log per repo in `docs/sessions/<repo>.md`.
+
 Rule of thumb: **document decisions and shape, not diffs.** Git already has the diffs.
-`docs/` exists so the *next* session does not have to re-derive why the code is the way
-it is.
+Docs exist so the *next* reader does not have to re-derive why the code is the way it
+is. Code comments are not a substitute: see `preferences/conventions.md` → Comments.
 
 ## Editing spine itself
 

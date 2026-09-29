@@ -90,7 +90,8 @@ symptom at the wrong layer is how a bug comes back in a different shape.
 
 ### 9. Record it
 
-If the cause was non-obvious, it belongs in `docs/<repo>/troubleshooting.md`: the
+If the cause was non-obvious, it belongs in the target repo's `docs/troubleshooting.md`
+(spine's `docs/` if the failure crossed repos): the
 symptom, the cause, the fix, and the signal that would identify it faster next time.
 Future sessions search that file.
 

@@ -1,7 +1,6 @@
 # <repo> — conventions
 
-Repo-specific patterns only. Anything universal belongs in spine's
-`preferences/conventions.md` instead.
+Patterns specific to this repo. Generic good practice does not belong here.
 
 ## Code
 
@@ -9,4 +8,4 @@ Repo-specific patterns only. Anything universal belongs in spine's
 
 ## Naming
 
-## Things this repo does differently from the spine defaults, and why
+## Where this repo departs from common practice, and why
