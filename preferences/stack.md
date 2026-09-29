@@ -18,7 +18,26 @@ otherwise. **An existing repo's choices always win** — consistency beats these
 | Unit tests (C#) | xUnit | |
 | E2E + visual regression | Playwright | the only browser automation tool |
 | Observability | OpenTelemetry → OTLP collector | keeps the backend swappable |
-| Containers | multi-stage, distroless/slim, non-root | pinned by digest for prod |
+| Containers | multi-stage, distroless/slim, non-root | version-pinned, never `latest`. See below |
+
+## Pinning container images
+
+**Third-party images: pin to a version tag, never `latest`.** Taking upstream bug-fix releases
+is acceptable — a patch you did not read is usually safer than a known bug you did not fix. A
+digest is not required, and demanding one for every base image buys precision that mostly gets
+paid for in stale images nobody dares to bump.
+
+Two practical notes. Many publishers do **not** ship a floating minor tag (cloudflared, for
+one, publishes `2026.8.3` and `latest` and nothing in between), so "track the minor" often
+degrades to "pin the patch and bump it deliberately". And in Kubernetes a moving tag does not
+update a running Deployment anyway without a rollout — automatic patch adoption is mostly
+theoretical unless something re-pulls.
+
+**Your own build artifacts are a different question, and those stay digest-pinned.** When CI
+builds an image, tests it, and promotes it to production, the digest is what makes "build once,
+promote the same artifact" a fact rather than an aspiration. A tag can be moved; a digest names
+one specific artifact. That is artifact identity, not version selection, and the reasoning above
+does not apply to it.
 
 ## Adding a dependency
 
