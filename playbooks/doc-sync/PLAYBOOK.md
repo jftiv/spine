@@ -26,6 +26,10 @@ There are two tiers. Write each fact once, in the tier where it belongs.
 | **Repo** | `<target repo>/docs/` | Everything about that one repo: overview, architecture, its own decisions, conventions, troubleshooting, deploy and schema notes, and the rationale kept out of code comments. |
 | **Spine** | `spine/docs/` | Anything that spans repos or concepts: how the repos connect, decisions whose reasoning involves more than one repo, cross-repo plans and migrations. Also the per-repo session log. |
 
+**Exception:** a repo that `docs/landscape.md` marks as an extension of spine (currently
+`homelab-infra`) keeps its docs in spine at `docs/<repo>/`, using the repo-tier layout. Only
+its operational procedures, like bootstrap and runbook, live in the repo itself.
+
 **Tie-break:** if explaining it requires knowing about another repo, the reasoning goes
 in spine. The repo's docs still state the local fact ("Postgres is provided by the
 platform, in-cluster"), so a person reading only that repo is not misled. They just
@@ -136,6 +140,11 @@ something was reversed is itself useful.
 ## Scope limits
 
 - Do not copy source code, secrets, credentials, or customer data into either tier.
+- **spine is a public repo.** In spine's `docs/`, write host addresses (LAN, tailnet, WAN), MAC
+  addresses, internal ports, account or tunnel IDs and hostnames that are not already public as
+  placeholders such as `<lan-ip>`. Describe *where* a value is held rather than the value.
+  Never record a password, key or token value, even a leaked or dead one. Private target repos
+  may carry the real values when their own docs need them.
 - Do not document a repo you did not work in this session.
 - Keep each file readable in one sitting. If a file is growing past a couple of pages,
   split it by subsystem or topic.

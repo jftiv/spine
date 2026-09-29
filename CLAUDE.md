@@ -57,6 +57,8 @@ is. Code comments are not a substitute: see `preferences/conventions.md` → Com
 
 ## Editing spine itself
 
+- **spine is public.** It doubles as a portfolio of this workflow. Nothing committed here may
+  contain secrets or real host addresses; see `playbooks/doc-sync/PLAYBOOK.md` → Scope limits.
 - Agents live in `agents/*.md`. Playbooks live in `playbooks/<name>/PLAYBOOK.md`.
 - Both are harness-neutral: no "use the Task tool", no Claude-specific tool names.
 - After editing either, run `./adapters/claude/sync.sh` so `.claude/` picks it up. The
