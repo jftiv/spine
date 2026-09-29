@@ -25,9 +25,9 @@ EDIT_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
 REASON = """\
 This session changed code outside spine, but spine's docs/ has not been updated.
 
-If the implementation work is complete, follow the `doc-sync` skill now: update
-docs/<repo>/ for the target repository you worked in and append a session entry to
-docs/<repo>/sessions.md.
+If the implementation work is complete, follow the `doc-sync` skill now: update the
+target repo's own docs/, update spine's cross-repo docs if the work crossed a repo
+boundary, and append a session entry to spine's docs/sessions/<repo>.md.
 
 If you are still mid-task, say so briefly and carry on — this reminder fires only once
 per session."""

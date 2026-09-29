@@ -7,9 +7,10 @@ advice on conflict.
 
 - **Smallest change that fully solves the problem.** Not the smallest change that makes
   the symptom go away, and not a rewrite of the surrounding area.
-- Match the surrounding code — its naming, its structure, its comment density — even
-  where you would have written it differently. A file with two styles is worse than a
-  file with one style you dislike.
+- Match the surrounding code — its naming, its structure — even where you would have
+  written it differently. A file with two styles is worse than a file with one style you
+  dislike. Comment density is the exception: follow **Comments** below even when the
+  file around you is heavier.
 - No unrequested refactors mixed into a functional change. Note the opportunity; do it
   separately if asked.
 - Do not add a compatibility shim, feature flag, or abstraction layer for a future that
@@ -17,9 +18,41 @@ advice on conflict.
 
 ## Comments
 
-Explain *why*, not *what*. Delete a comment that restates the line below it. No
-changelog comments in code — that is what git is for. No "removed X" or "this used to
-be Y" markers.
+**Default to no comment.** Explanation belongs in the repo's docs; comments are for the
+few things a reader of *this line* would get wrong without being told.
+
+A comment earns its place only when the code is:
+
+- **Out of pattern** — it looks wrong or roundabout and is not: a workaround, a required
+  ordering, a deliberately swallowed error, a call that must not be "simplified".
+- **Dangerous to change** — the cost of a wrong edit is high and invisible from the code:
+  security, data loss, an immutable field, a value another system depends on.
+
+When one is warranted:
+
+- One or two lines. If it needs a paragraph, the paragraph goes in docs and the comment
+  becomes a pointer: `# see docs/deploy.md#migrations`.
+- Explain *why*, not *what*. Delete a comment that restates the line below it.
+- Doc comments on public API (XML docs, JSDoc) state the contract in a sentence. Design
+  rationale does not go there either.
+- No changelog comments — that is what git is for. No "removed X" or "this used to be Y".
+
+**A change's comments should never outweigh its code.** If they do, that is a review
+finding in its own right.
+
+## Docs
+
+Rationale, rejected alternatives, how pieces fit together, and operational gotchas go in
+the target repo's own `docs/`, where anyone reading the code will look. What spans
+repos goes in spine's `docs/`. `playbooks/doc-sync/PLAYBOOK.md` has the full split.
+
+Write docs for two readers at once, a person skimming and an agent searching:
+
+- One topic per heading, with headings specific enough to link to and grep for.
+- Lead each section with the rule or fact, then the reason. Name files, config keys and
+  commands exactly as they appear in the code, so a search finds them.
+- Plain statements over narrative. No "as mentioned above". Each section should stand on
+  its own.
 
 ## Errors
 

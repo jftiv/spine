@@ -4,7 +4,8 @@ The control repo for AI-driven development. Open Claude Code here, always. Point
 target repository when you want code changes.
 
 Nothing in `spine` builds product code. It holds the *definitions* — agents, playbooks,
-preferences — and the accumulated *documentation* of every repo worked on from here.
+preferences — and the documentation that ties the target repos together. Each repo's own
+documentation lives in that repo.
 
 ## Layout
 
@@ -15,7 +16,7 @@ adapters/          Per-harness translation. adapters/claude/ is the live one.
   claude/sync.sh     agents/ + playbooks/  ->  .claude/agents/ + .claude/skills/
   claude/hooks/      Hook scripts wired up in .claude/settings.json
 preferences/       Stack defaults, conventions, and review standards agents read
-docs/<repo>/       Living documentation for each target repo, written by sessions here
+docs/              Cross-repo docs and per-repo session logs. Repo docs live in each repo.
 ```
 
 ## Setup
@@ -54,8 +55,9 @@ step that is easy to forget; if a change to an agent seems to have had no effect
 why.
 
 In-session: *"Work in `~/source/acme-api`. Add rate limiting to the public
-endpoints."* Claude reads `docs/acme-api/` for context, delegates to the relevant agents,
-edits the target repo, and on session end the doc-sync hook refreshes `docs/acme-api/`.
+endpoints."* Claude reads `acme-api/docs/` and spine's cross-repo docs for context, delegates to the
+relevant agents, edits the target repo, and on session end the doc-sync hook has it update
+the repo's docs and append to `docs/sessions/acme-api.md`.
 
 ## Design rules
 
@@ -66,5 +68,6 @@ edits the target repo, and on session end the doc-sync hook refreshes `docs/acme
    `agents/` and `playbooks/`; run `sync.sh`. Never hand-edit the generated trees — the
    next sync deletes them. `.claude/settings.json` is *not* generated; it is hand-written
    and committed.
-3. **`docs/` is the memory.** If a session learned something durable about a target repo,
-   it belongs in `docs/<repo>/`, not in a chat log.
+3. **Docs are the memory, and they live where their subject lives.** If a session learned
+   something durable about one repo, it goes in that repo's `docs/`. If it involves several
+   repos, it goes in spine's `docs/`. Never only in a chat log.
