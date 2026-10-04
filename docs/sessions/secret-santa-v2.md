@@ -5,6 +5,33 @@ now live in the repo's own `docs/`; cross-repo decisions are in spine's `docs/de
 
 Newest first.
 
+## 2026-10-03 — First deploy: dev and prod, M6.5 Phase 4 gate passed
+
+**Changed:**
+- PR #3 merged: `limits.cpu: 500m` on the API Deployment and the migrate Job. The tenant
+  namespace's ResourceQuota covers `limits.cpu`, so pods without a CPU limit were rejected at
+  admission. That was why the first dev deploy (2026-09-29, run 36566170493) timed out on
+  `job/migrate` with no logs. It was fixed in an undocumented session the same day (2226b5a5).
+- Deployed `main` at `ee987f7` (image `sha256:2dca592a…`) to dev, then prod. Both workflows green.
+  Prod's `/readyz` at `https://api.secret-santa.net` returns 200, which verifies the DNS record,
+  tunnel, Traefik and vcluster Ingress sync in one request. Before the deploy it returned
+  Traefik's plain 404 (path live, no Ingress).
+- Phase 4 gate, done by the owner on dev: created a game, looked up a draw by token, inspected the
+  participants in dev's Postgres. Prod has 0 games.
+- Repo docs: `README.md` status, `deploy.md` (identical connection strings, mandatory CPU limit,
+  first-deploy steps 1–3 done) and a `troubleshooting.md` entry for the empty-log migrate timeout.
+  On branch `docs-first-deploy`, **not committed**.
+
+**Decisions:** none new. Confirmed dev and prod databases are separate: different CNPG Cluster
+UIDs and system IDs, and separate pods on the host. The identical `Host=` in both connection
+strings is per-vcluster DNS. Recorded in the repo's `deploy.md` → The database.
+
+**Open:**
+- M7 remainder: build the client with `VITE_API_BASE_URL=https://api.secret-santa.net`, upload to
+  Hostinger, check `Cors__AllowedOrigins__0`, send one real exchange to yourself.
+- M6.5 Phase 5 (prod restore drill + runbook) and Phase 6 (decommission Hostinger MySQL).
+- Still open from 2026-09-28: whether the migrate Job name should carry the git SHA.
+
 ## 2026-09-28 — Docs moved into the repo; comments trimmed
 
 **Changed:**
