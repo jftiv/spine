@@ -5,6 +5,71 @@ now live in the repo's own `docs/`; cross-repo decisions are in spine's `docs/de
 
 Newest first.
 
+## 2026-10-03 — M7 complete: client live, first real exchange delivered
+
+**Changed:**
+- Client built with `VITE_API_BASE_URL=https://api.secret-santa.net` and the prod Turnstile site
+  key (58 tests green), then uploaded to Hostinger by the owner. Creating a game from the live
+  site works, so CORS is correct.
+- Email took two fixes outside the app, both found by watching mail not arrive:
+  1. Brevo's authorised-IP list rejected the homelab's IP with 401. The `creator_verify` row went
+     to `Failed`, the owner added the IP, and the row was requeued by hand in prod's Postgres.
+     Afterwards the owner turned the IP check off for API keys entirely.
+  2. Brevo then logged the message as Sent but never delivered it, because `secret-santa.net` had
+     no DKIM, DMARC or verification records. These were added in `homelab-infra` PR #6
+     (`00-cloudflare/mail.tf`).
+- After both: verify email received, link confirmed, and all three draw emails received. **The
+  app is live, and the parity line is crossed.**
+- No code changes. Repo docs: README status, `deploy.md` (Brevo prerequisites, `.htaccess`
+  upload check, the `secretsanta` database name, first-deploy steps 4–7 done), `troubleshooting.md`
+  (both email failures, plus the requeue SQL), `architecture.md`, and two `decisions.md` entries.
+  Added to the open PR #4 branch `docs-first-deploy`.
+
+**Decisions:** Three, in the repo's `decisions.md`: the client stays on Hostinger for now; Brevo
+401/403 stay permanent failures (the owner's call, which reverses the docs' earlier
+recommendation); and Brevo's authorised-IP check is off for API keys, so a residential IP change
+can't silently stop mail. Also settled: email failover to SendGrid would not need a DNS swap, because the
+two providers' records can coexist (spine `docs/homelab-infra/sessions.md`).
+
+**Open:**
+- Nothing alerts on `Failed` email rows. With the IP check off, a lapsed Brevo key is the
+  remaining way mail dies silently. That's an argument for pulling M11 monitoring forward.
+- `mail.secret-santa.net`, the marketing sender, has no authentication records yet. It needs them
+  before M10.
+- The SendGrid fallback exists in code only. Whether a SendGrid account exists is unknown.
+- `client/public/.htaccess` long-cache rule omits `jpg`, so the 80 KB masthead revalidates on
+  every visit. A one-word fix.
+- Still open: M6.5 Phase 5 (prod restore drill) and Phase 6 (decommission Hostinger MySQL); the
+  migrate Job SHA-suffix question; the `Microsoft.OpenApi` pin.
+- The old `secret-santa-web` repo can now be deleted, as planned.
+
+## 2026-10-03 — First deploy: dev and prod, M6.5 Phase 4 gate passed
+
+**Changed:**
+- PR #3 merged: `limits.cpu: 500m` on the API Deployment and the migrate Job. The tenant
+  namespace's ResourceQuota covers `limits.cpu`, so pods without a CPU limit were rejected at
+  admission. That was why the first dev deploy (2026-09-29, run 36566170493) timed out on
+  `job/migrate` with no logs. It was fixed in an undocumented session the same day (2226b5a5).
+- Deployed `main` at `ee987f7` (image `sha256:2dca592a…`) to dev, then prod. Both workflows green.
+  Prod's `/readyz` at `https://api.secret-santa.net` returns 200, which verifies the DNS record,
+  tunnel, Traefik and vcluster Ingress sync in one request. Before the deploy it returned
+  Traefik's plain 404 (path live, no Ingress).
+- Phase 4 gate, done by the owner on dev: created a game, looked up a draw by token, inspected the
+  participants in dev's Postgres. Prod has 0 games.
+- Repo docs: `README.md` status, `deploy.md` (identical connection strings, mandatory CPU limit,
+  first-deploy steps 1–3 done) and a `troubleshooting.md` entry for the empty-log migrate timeout.
+  On branch `docs-first-deploy`, **not committed**.
+
+**Decisions:** none new. Confirmed dev and prod databases are separate: different CNPG Cluster
+UIDs and system IDs, and separate pods on the host. The identical `Host=` in both connection
+strings is per-vcluster DNS. Recorded in the repo's `deploy.md` → The database.
+
+**Open:**
+- M7 remainder: build the client with `VITE_API_BASE_URL=https://api.secret-santa.net`, upload to
+  Hostinger, check `Cors__AllowedOrigins__0`, send one real exchange to yourself.
+- M6.5 Phase 5 (prod restore drill + runbook) and Phase 6 (decommission Hostinger MySQL).
+- Still open from 2026-09-28: whether the migrate Job name should carry the git SHA.
+
 ## 2026-09-28 — Docs moved into the repo; comments trimmed
 
 **Changed:**
