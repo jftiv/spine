@@ -20,6 +20,31 @@ Settings → Version Control → Providers → GitHub.com → reconnect. Runs tr
 was dead are not replayed and must be started by hand. Seen 2026-09-27; the token had worked on
 2026-09-06, and what revoked it is unknown.
 
+**It keeps recurring, and the cause is still unknown.** As of 2026-10-03 the owner reconnects
+roughly daily. What is known:
+- HCP's VCS event log (`GET /api/v2/organizations/<org>/vcs-events`) shows `There was an error
+  fetching data from repository` on 09-27 and twice on 09-29. This log is the quickest way to
+  confirm the token is the problem.
+- The `ot-…` token has had the same ID since it was created on 2026-09-03. Reconnecting
+  repairs it in place, so something on GitHub's side keeps invalidating the authorization.
+- On 2026-10-03, PR #6 got no speculative run and no logged error, even though GitHub shows the
+  webhook delivered with `200`.
+- **Switching to HCP's GitHub App connection did not work.** "GitHub App" is not offered in
+  workspace VCS settings for this org. Installing the app by hand (it is still listed on GitHub
+  as "Terraform Cloud") ended on an HCP 404 page.
+
+Next step: check GitHub → Settings → Applications → Authorized OAuth Apps for duplicate
+authorizations of the app behind HCP's "GitHub.com" provider. GitHub keeps at most ten tokens per
+user and OAuth app, and authorizing an eleventh revokes the oldest.
+
+**To plan a branch while the connection is down, or at any time,** run `terraform init &&
+terraform plan` in the layer's directory on that branch. It runs remotely on the agent with the
+workspace's variables. Applies still have to come from `main`.
+
+**The workspace's VCS settings page looks empty after "Change source".** That page is the
+provider picker for a *new* connection. Leaving it without saving keeps the existing connection;
+the workspace API still shows the repo, branch and working directory.
+
 **A PR's speculative plans fail with "Unsupported attribute" or "Unable to find remote state".**
 Not a bug when the PR adds an output in one layer and consumes it in another. Speculative plans
 read the *applied* state below them, which doesn't have the output yet. Merge, then apply layer

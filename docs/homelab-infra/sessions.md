@@ -2,6 +2,28 @@
 
 Newest first.
 
+## 2026-10-03 — Brevo mail DNS; recurring HCP VCS disconnects investigated
+
+**Changed:**
+- PR #6 merged and applied: `terraform/00-cloudflare/mail.tf` adds Brevo's verification TXT,
+  `brevo1`/`brevo2._domainkey` CNAMEs (DNS-only) and `_dmarc` for `secret-santa.net`. Without
+  them Brevo accepted secret-santa-v2's mail and never delivered it.
+
+**Decisions:** none recorded. Two providers can be authenticated on the domain side by side:
+DKIM selectors are per provider, and DMARC and verification TXTs don't conflict. Failing over to
+SendGrid would not need a DNS swap, only its own records added.
+
+**Open:**
+- The GitHub OAuth connection keeps getting revoked. Findings and next step are in
+  `troubleshooting.md`. The GitHub App alternative is not available to this org, as far as was
+  tried.
+- Check https://github.com/settings/installations for a leftover "Terraform Cloud" app install
+  from the failed attempt, and uninstall it if present. Also review the DigitalOcean app, which
+  has access to this repo for no known reason.
+- The `homelab-pool` agent pool has six `errored` agent registrations from September next to the
+  live one. They are stale and can be deleted.
+- The apex `secret-santa.net` A record (Hostinger) is still unmanaged by Terraform.
+
 ## 2026-09-27 — Databases layer applied, mTLS defect fixed, restore proven on dev
 
 **Changed:**

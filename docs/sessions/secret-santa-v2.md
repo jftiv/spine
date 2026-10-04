@@ -5,6 +5,44 @@ now live in the repo's own `docs/`; cross-repo decisions are in spine's `docs/de
 
 Newest first.
 
+## 2026-10-03 — M7 complete: client live, first real exchange delivered
+
+**Changed:**
+- Client built with `VITE_API_BASE_URL=https://api.secret-santa.net` and the prod Turnstile site
+  key (58 tests green), then uploaded to Hostinger by the owner. Creating a game from the live
+  site works, so CORS is correct.
+- Email took two fixes outside the app, both found by watching mail not arrive:
+  1. Brevo's authorised-IP list rejected the homelab's IP with 401. The `creator_verify` row went
+     to `Failed`, the owner added the IP, and the row was requeued by hand in prod's Postgres.
+     Afterwards the owner turned the IP check off for API keys entirely.
+  2. Brevo then logged the message as Sent but never delivered it, because `secret-santa.net` had
+     no DKIM, DMARC or verification records. These were added in `homelab-infra` PR #6
+     (`00-cloudflare/mail.tf`).
+- After both: verify email received, link confirmed, and all three draw emails received. **The
+  app is live, and the parity line is crossed.**
+- No code changes. Repo docs: README status, `deploy.md` (Brevo prerequisites, `.htaccess`
+  upload check, the `secretsanta` database name, first-deploy steps 4–7 done), `troubleshooting.md`
+  (both email failures, plus the requeue SQL), `architecture.md`, and two `decisions.md` entries.
+  Added to the open PR #4 branch `docs-first-deploy`.
+
+**Decisions:** Three, in the repo's `decisions.md`: the client stays on Hostinger for now; Brevo
+401/403 stay permanent failures (the owner's call, which reverses the docs' earlier
+recommendation); and Brevo's authorised-IP check is off for API keys, so a residential IP change
+can't silently stop mail. Also settled: email failover to SendGrid would not need a DNS swap, because the
+two providers' records can coexist (spine `docs/homelab-infra/sessions.md`).
+
+**Open:**
+- Nothing alerts on `Failed` email rows. With the IP check off, a lapsed Brevo key is the
+  remaining way mail dies silently. That's an argument for pulling M11 monitoring forward.
+- `mail.secret-santa.net`, the marketing sender, has no authentication records yet. It needs them
+  before M10.
+- The SendGrid fallback exists in code only. Whether a SendGrid account exists is unknown.
+- `client/public/.htaccess` long-cache rule omits `jpg`, so the 80 KB masthead revalidates on
+  every visit. A one-word fix.
+- Still open: M6.5 Phase 5 (prod restore drill) and Phase 6 (decommission Hostinger MySQL); the
+  migrate Job SHA-suffix question; the `Microsoft.OpenApi` pin.
+- The old `secret-santa-web` repo can now be deleted, as planned.
+
 ## 2026-10-03 — First deploy: dev and prod, M6.5 Phase 4 gate passed
 
 **Changed:**

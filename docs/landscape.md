@@ -23,6 +23,7 @@ they operate.
                 Cloudflare edge (TLS, DNS)
                          │ tunnel (outbound-only)
 homelab-infra ───────────┼─────────────────────────────────────────────
+  00-cloudflare  tunnel, `api` DNS record, Brevo sender-auth records (DKIM, DMARC)
   10-host        cloudflared → Traefik ← Ingress synced out of the prod vcluster
   15-databases   CNPG Cluster in `data` ns ──WAL + base backups──► R2
   20-tenants     `secret-santa` ns, quota, NetworkPolicy, deployer RBAC,
@@ -33,6 +34,7 @@ secret-santa-v2 ─────────┼───────────�
   (applies workloads into the ns;         reach Postgres on 5432 through
    never creates it)                      the cross-namespace NetworkPolicy
   client/dist ──► Hostinger static hosting (not on homelab)
+  email outbox ──► Brevo API (IP check off for API keys; see the repo's decisions.md)
 ```
 
 ### The contract between them
@@ -64,6 +66,8 @@ A change on one side that the other side must know about:
 | Tenant quota or NetworkPolicy | The app's resource requests; `/readyz` after deploy |
 | Postgres major version | The app's Testcontainers image (`postgres:18.4`), which matches it on purpose |
 | Hostnames or tunnel ingress rules | `Site__BaseUrl`, `Cors__AllowedOrigins__0`, the deploy workflow's smoke URL |
+| The app's sender domain or email provider | Sender-authentication records in `00-cloudflare/mail.tf`. A domain without them gets mail accepted by the provider and never delivered |
+| Brevo's authorised-IP setting (off for API keys since 2026-10-03) | If re-enabled, the homelab's public IP must be listed and kept current. An unlisted IP returns 401, and the app marks that mail `Failed` permanently |
 
 ## Cross-repo history
 

@@ -97,7 +97,7 @@ kubeconfig has to name it.
 
 | Layer | Manages | Depends on |
 |---|---|---|
-| `00-cloudflare` | Tunnel, tunnel ingress rules, DNS, R2 backup bucket | nothing |
+| `00-cloudflare` | Tunnel, tunnel ingress rules, DNS (including the Brevo sender-authentication records in `mail.tf`), R2 backup bucket | nothing |
 | `10-host` | Namespaces, cloudflared, 2× vcluster | `00` (tunnel token) |
 | `15-databases` | Per vcluster: CNPG operator, Barman plugin + its mTLS certs, `data` namespace, one Postgres Cluster per app, app role credentials, connection strings | `00` (R2 bucket, endpoint), `10` (vcluster kubeconfigs) |
 | `20-tenants` | Per-vcluster namespace, quota, NetworkPolicy, deploy SA, pull secret, `secret-santa-config` | `10` (vcluster kubeconfigs), `15` (connection strings) |
